@@ -15,6 +15,7 @@ import (
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/joho/godotenv"
 )
 
 // TicketTier represents different ticket categories
@@ -432,10 +433,14 @@ func (s *Server) seedTickets() error {
 }
 
 func main() {
+	// Load .env file if it exists
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using system environment variables")
+	}
 	// Database connection
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		dbURL = "postgres://ticketuser:ticketpass@localhost/ticketdb?sslmode=disable"
+		log.Println("dbURL not set in .env file")
 	}
 	
 	db, err := sql.Open("postgres", dbURL)
