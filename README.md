@@ -2,13 +2,9 @@
 
 A full-stack concert ticket booking application with a React + TypeScript frontend and Golang backend.
 
-## Project Overview
-
-This system demonstrates a production-ready ticket booking platform that can handle global users at scale, with particular attention to concurrency control, data consistency, and user experience.
-
 ### Key Features
 
-- **Three Ticket Tiers**: VIP ($100), Front Row ($50), General Admission ($10)
+- **Three Ticket Tiers**: VIP ($100), Front Row ($50), General Admission GA ($10)
 - **Real-time Availability**: Live ticket counts and availability status
 - **Concurrency Control**: Prevents double-booking using database-level locking
 - **Global User Support**: Optimized for distributed users worldwide
@@ -29,75 +25,70 @@ This system demonstrates a production-ready ticket booking platform that can han
 - **HTTP Client**: Axios with error handling
 - **Type Safety**: Full TypeScript implementation
 
-## 🚀 Quick Start
+## Quick Start
 
-### Prerequisites
-- Go 1.21+
-- Node.js 16+
-- PostgreSQL 13+
-- Docker (optional)
+### Docker Setup (Recommended)
 
-### Backend Setup
+**Prerequisites:**
+- docker or podman
+- docker-compose or podman-compose
 
-1. **Install Dependencies**
-   ```bash
-   cd backend
-   go mod download
-   ```
-
-2. **Database Setup**
-   ```bash
-   # Create database
-   createdb ticketdb
-   
-   # Set connection string (default: postgres://user:password@localhost/ticketdb?sslmode=disable)
-   export DATABASE_URL="postgres://user:password@localhost/ticketdb?sslmode=disable"
-   ```
-
-3. **Run Server**
-   ```bash
-   go run main.go
-   ```
-   
-   Server will start on `http://localhost:8080`
-
-### Frontend Setup
-
-1. **Install Dependencies**
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-2. **Start Development Server**
-   ```bash
-   npm start
-   ```
-   
-   Frontend will start on `http://localhost:3000`
-
-### Docker Setup (Backend Only)
-
+**Complete Application:**
 ```bash
-# Build and run backend services with Docker Compose
-cd backend
-docker-compose up --build
+# Build and run all services
+docker-compose up --build -d or podman-compose up --build -d
 ```
 
 This will start:
-- PostgreSQL database on port 5432
-- Backend API on port 8080
+- **PostgreSQL** database on port 5432
+- **Backend API** on port 8080
+- **Frontend** on port 3000
 
-Then start the frontend separately:
+**Access the application:**
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080/api/health
+- **Database**: localhost:5432
+
+**Stop the application:**
+```bash
+docker-compose down or podman-compose down
+```
+
+### Local Development Setup
+
+**Prerequisites:**
+- Go 1.21+
+- Node.js 16+
+- PostgreSQL 13+
+
+**Backend Setup:**
+```bash
+cd backend
+go mod download
+go run main.go
+```
+
+**Frontend Setup:**
 ```bash
 cd frontend
 npm install
 npm start
 ```
 
-Access the application at: http://localhost:3000
+### Environment Variables
 
-## 📊 API Endpoints
+**Backend (.env):**
+```bash
+DATABASE_URL=postgres://<dbuser>:<dbpass>@localhost/<db>?sslmode=disable
+PORT=8080
+```
+
+**Frontend (.env):**
+```bash
+REACT_APP_API_URL=/api
+```
+
+## API Endpoints
 
 ### Ticket Management
 - `GET /api/tickets` - Get all tickets with booking status
@@ -105,13 +96,22 @@ Access the application at: http://localhost:3000
 - `POST /api/bookings` - Create new booking
 - `GET /api/health` - Health check endpoint
 
-### Booking Flow
-1. Check ticket availability
-2. Submit booking request with user ID and payment ID
-3. System validates availability and processes payment
-4. Tickets are atomically booked using database transactions
+### Example Usage
+```bash
+# Check ticket availability
+curl http://localhost:3000/api/tickets/availability
 
-## 🔒 Concurrency & Consistency
+# Create a booking
+curl -X POST http://localhost:3000/api/bookings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user123",
+    "tier": "VIP",
+    "quantity": 2
+  }'
+```
+
+##  Concurrency & Consistency
 
 ### Double-Booking Prevention
 
@@ -141,78 +141,14 @@ The system uses multiple layers of protection against double-booking:
    - All booking operations are wrapped in ACID transactions
    - Automatic rollback on any failure
 
-### Race Condition Handling
+### CORS Configuration
 
-The booking flow is designed to handle race conditions gracefully:
-
-1. **Ticket Selection**: Uses `SKIP LOCKED` to avoid waiting for locked tickets
-2. **Availability Check**: Validates sufficient tickets before proceeding
-3. **Atomic Updates**: All ticket updates happen in a single transaction
-4. **Conflict Resolution**: Failed bookings return clear error messages
-
-## 📈 Scalability Design
-
-### Target Metrics
-- **Daily Active Users**: ~1,000,000 DAU
-- **Peak Concurrent Users**: ~50,000
-- **Booking Response Time**: p95 < 500ms
-- **Availability Target**: 99.99%
-
-### Scaling Strategies
-
-#### Database Scaling
-1. **Read Replicas**
-   - Separate read replicas for ticket catalog queries
-   - Primary database handles all write operations (bookings)
-   - Reduces read load on primary database
-
-2. **Connection Pooling**
-   - Configured connection pools (pgxpool)
-   - Connection limits based on database capacity
-   - Proper connection lifecycle management
-
-3. **Database Sharding**
-   - Horizontal sharding by event or region
-   - Each shard handles independent ticket inventories
-   - Cross-shard bookings handled by coordination service
-
-#### Application Scaling
-1. **Horizontal Scaling**
-   - Stateless backend design enables horizontal scaling
-   - Load balancer distributes traffic across instances
-   - Auto-scaling based on CPU/memory metrics
-
-2. **Caching Strategy**
-   - Redis for ticket availability caching
-   - Cache invalidation on successful bookings
-   - CDN for static assets
-
-3. **Microservices Architecture**
-   - Separate services for catalog, booking, and payments
-   - Independent scaling per service
-   - Circuit breakers for fault isolation
-   
-
-### Environment Variables
-```bash
-# Backend
-DATABASE_URL="postgres://user:password@localhost/ticketdb?sslmode=disable"
-PORT="8080"
-
-# Frontend
-REACT_APP_API_URL="http://localhost:8080/api"
-```
-
-### Database Schema
-```sql
-CREATE TABLE tickets (
-    id SERIAL PRIMARY KEY,
-    tier VARCHAR(20) NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
-    is_booked BOOLEAN DEFAULT FALSE,
-    booked_by VARCHAR(255),
-    booked_at TIMESTAMP,
-    version INTEGER DEFAULT 1,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+The backend includes CORS middleware to allow frontend requests:
+```go
+corsHandler := handlers.CORS(
+    handlers.AllowedOrigins([]string{"http://localhost:3000"}),
+    handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+    handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+    handlers.AllowCredentials(),
+)
 ```
