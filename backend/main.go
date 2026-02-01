@@ -312,8 +312,8 @@ func (s *Server) healthCheck(w http.ResponseWriter, r *http.Request) {
 
 // Helper functions
 func simulatePayment(paymentID string) bool {
-	// Simulate 90% success rate
-	return len(paymentID)%10 != 0
+	// Simulated payment id has 90% success rate
+	return len(paymentID) > 10
 }
 
 func generateBookingID() string {

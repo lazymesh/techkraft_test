@@ -155,7 +155,6 @@ const BookingModal: React.FC<BookingModalProps> = ({
               step={1}
               marks={[
                 { value: 1, label: '1' },
-                { value: Math.min(5, maxQuantity), label: Math.min(5, maxQuantity).toString() },
                 { value: maxQuantity, label: maxQuantity.toString() },
               ].filter((mark, index, arr) => arr.findIndex(m => m.value === mark.value) === index)}
               valueLabelDisplay="auto"
@@ -202,7 +201,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
 
           <Alert severity="info" sx={{ mt: 2 }}>
             <Typography variant="body2">
-              This is a simulation. Payment processing has a 90% success rate.
+              This simulation button gives you 90% success rate.
             </Typography>
           </Alert>
         </DialogContent>
