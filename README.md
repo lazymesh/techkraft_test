@@ -1,8 +1,8 @@
 # Concert Ticket Booking System
 
-A full-stack concert ticket booking application with a React + TypeScript frontend and Golang backend, designed to handle high-concurrency scenarios while preventing double-booking.
+A full-stack concert ticket booking application with a React + TypeScript frontend and Golang backend.
 
-## 🎯 Project Overview
+## Project Overview
 
 This system demonstrates a production-ready ticket booking platform that can handle global users at scale, with particular attention to concurrency control, data consistency, and user experience.
 
@@ -14,7 +14,7 @@ This system demonstrates a production-ready ticket booking platform that can han
 - **Global User Support**: Optimized for distributed users worldwide
 - **Responsive UI**: Modern Material-UI design with mobile support
 
-## 🏗️ Architecture
+## Architecture
 
 ### Backend (Golang)
 - **Framework**: Gorilla Mux for HTTP routing

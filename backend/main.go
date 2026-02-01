@@ -16,6 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"github.com/joho/godotenv"
+	"github.com/gorilla/handlers"
 )
 
 // TicketTier represents different ticket categories
@@ -343,9 +344,17 @@ func (s *Server) Start(port string) error {
 		return fmt.Errorf("failed to seed tickets: %w", err)
 	}
 
+	// Setup CORS middleware
+	corsHandler := handlers.CORS(
+		handlers.AllowedOrigins([]string{"http://localhost:3000"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
+		handlers.AllowCredentials(),
+	)
+
 	server := &http.Server{
 		Addr:    ":" + port,
-		Handler: s.router,
+		Handler: corsHandler(s.router),
 	}
 
 	// Graceful shutdown
