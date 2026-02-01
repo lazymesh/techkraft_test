@@ -152,3 +152,22 @@ corsHandler := handlers.CORS(
     handlers.AllowCredentials(),
 )
 ```
+
+# Non-Functional Requirements
+### Availability (99.99% Target)
+While this implementation runs in a single-region setup, following can be done for high availability in a production environment:
+The Golang API be run on multiple instances behind a load balancer.
+PostgreSQL supports replication primary–replica setup can be utilized.
+A multi-region setup with traffic routing and database replication would enable the system to meet the 99.99% availability target.
+
+### Scalability (1,000,000 DAU / 50,000 Concurrent Users)
+A load balancer distributes incoming traffic evenly across backend instances. Row-level locking with FOR UPDATE SKIP LOCKED allows concurrent booking requests to be processed safely without conflicts. Each Request are independent of other request with respective database transaction. Frequently accessed read endpoints (e.g., ticket availability) can be served via caching or read replicas to reduce load on the primary database. Running on
+well tested servers like NGINX, AWS cloudfront etc can certainly handle multi-million users concurrently.
+
+### Performance (p95 < 500ms for Booking Requests)
+This is achieved through:
+Indexed queries and limited row selection (LIMIT) minimize database scan time.
+Booking transactions are kept minimal to reduce lock contention.
+Using PostgreSQL row-level locking avoids costly application-level synchronization.
+Version-based updates prevent unnecessary retries and ensure consistency with minimal overhead.
+Post-booking operations (e.g., notifications) are decoupled from the critical booking request path.
