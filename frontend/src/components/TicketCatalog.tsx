@@ -72,6 +72,7 @@ const TicketCatalog: React.FC = () => {
       if (result.success) {
         // Refresh availability after successful booking (silent refresh)
         await fetchTicketAvailability(false);
+        setBookingModalOpen(false);
       }
     } catch (err) {
       console.error('Booking error:', err);

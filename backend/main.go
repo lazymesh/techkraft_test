@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"sort"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -170,6 +171,9 @@ func (s *Server) getTicketAvailability(w http.ResponseWriter, r *http.Request) {
 		}
 		
 		availabilities = append(availabilities, avail)
+		sort.Slice(availabilities, func(i, j int) bool {
+			return availabilities[i].Price < availabilities[j].Price
+		})
 	}
 
 	w.Header().Set("Content-Type", "application/json")
