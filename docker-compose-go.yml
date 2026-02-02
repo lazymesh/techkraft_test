@@ -22,7 +22,7 @@ services:
   # Backend API
   backend:
     build:
-      context: ./backend
+      context: ./backend-go
       dockerfile: Dockerfile
     container_name: ticket-booking-api
     environment:
