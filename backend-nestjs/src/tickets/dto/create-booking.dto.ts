@@ -11,4 +11,7 @@ export class CreateBookingDto {
   @Min(1)
   @Max(10)
   quantity: number;
+
+  @IsString()
+  payment_id: string;
 }

@@ -33,7 +33,7 @@ export class TicketsService {
       total: parseInt(row.total),
       available: parseInt(row.available),
       price: parseFloat(row.price),
-    }));
+    })).sort((a, b) => a.price - b.price);
   }
 
   async createBooking(createBookingDto: CreateBookingDto) {
@@ -57,6 +57,10 @@ export class TicketsService {
         throw new ConflictException('Insufficient tickets available');
       }
 
+      if (createBookingDto.payment_id.length < 10) {
+        throw new ConflictException('Payment id is incorrect');
+      }
+      
       const bookingTime = new Date();
       const bookingId = `BK${Date.now()}`;
 
