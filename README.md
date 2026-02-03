@@ -196,4 +196,3 @@ This is achieved through:
 - Booking transactions are kept minimal to reduce lock contention
 - Using PostgreSQL row-level locking avoids costly application-level synchronization
 - Version-based updates prevent unnecessary retries and ensure consistency with minimal overhead
-- Post-booking operations (e.g., notifications) are decoupled from the critical booking request path
