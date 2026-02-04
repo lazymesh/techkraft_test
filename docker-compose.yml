@@ -19,15 +19,20 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API
+  # NestJS Backend API
   backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     container_name: ticket-booking-api
     environment:
-      DATABASE_URL: postgres://ticketuser:ticketpass@postgres:5432/ticketdb?sslmode=disable
       PORT: 8080
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ticketuser
+      DB_PASSWORD: ticketpass
+      DB_DATABASE: ticketdb
     ports:
       - "8080:8080"
     depends_on:
@@ -39,6 +44,23 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ticket-booking-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 volumes:
   postgres_data:
